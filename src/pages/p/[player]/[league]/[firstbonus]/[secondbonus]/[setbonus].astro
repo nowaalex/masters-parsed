@@ -1,0 +1,288 @@
+---
+import Base from "layouts/Base.astro";
+import puppeteer from "puppeteer";
+
+export const prerender = false;
+
+interface Match {
+  time: string;
+  player: string;
+  setsWon: number;
+  setsLost: number;
+  forfeit: boolean;
+  final: boolean;
+  prize: number;
+  bgClass: string;
+}
+
+const { player, league, firstbonus, secondbonus, setbonus } = Astro.params;
+
+let error = "";
+let matches: [string, Match[]][] = [];
+
+const normalizedFirstbonus = Number.parseInt(firstbonus!, 10);
+const normalizedSecondbonus = Number.parseInt(secondbonus!, 10);
+const normalizedSetbonus = Number.parseInt(setbonus!, 10);
+const normalizedLeague = league!.trim().replace(/_+/, " ");
+const normalizedPlayer = player!.trim().replace(/_+/, " ");
+
+const browser = await puppeteer.launch();
+const page = await browser.newPage();
+await page.goto("https://masterspl.com/players.html");
+
+const WszystkoOption = "Wszystko";
+
+async function clickOption(prefix: string, option: string) {
+  const selectContainer = await page.$(`#${prefix}-container`);
+
+  if (!selectContainer) {
+    throw Error(`Could not locate ${prefix} select`);
+  }
+
+  await selectContainer.click();
+
+  const allSelectorResults = await page.waitForSelector(`#${prefix}-results`, {
+    timeout: 1000,
+  });
+
+  if (!allSelectorResults) {
+    throw Error(`Could not locate ${prefix} results`);
+  }
+
+  const allSelectorOption = await allSelectorResults.$(`::-p-text(${option})`);
+
+  if (!allSelectorOption) {
+    throw Error("Could not locate all display option");
+  }
+
+  await allSelectorOption.click();
+  await page.waitForNetworkIdle({ timeout: 7000 });
+}
+
+async function parseMatchesTable() {
+  const allMatchesTable = await page.waitForSelector(
+    "#stab_matches.active .jstable",
+    {
+      timeout: 2000,
+    }
+  );
+
+  if (!allMatchesTable) {
+    throw Error("Could not locate all matches table");
+  }
+
+  return allMatchesTable.evaluate(
+    (
+      el,
+      normalizedPlayer,
+      normalizedFirstbonus,
+      normalizedSecondbonus,
+      normalizedSetbonus
+    ) => {
+      const matches: [string, Match[]][] = [];
+      let curMatches: Match[] | null = null;
+
+      for (const row of el.children) {
+        if (row.childElementCount !== 8) {
+          curMatches = [];
+          matches.push([row.textContent!.trim(), curMatches]);
+          continue;
+        }
+
+        if (!curMatches) {
+          throw Error("Error parsing matches: wrong order");
+        }
+
+        const { children } = row;
+
+        const scoreString = children[3].textContent!.trim().toLowerCase();
+        const scoreArray = scoreString.match(/(\d+)[^\d]+(\d+)/);
+        const forfeit =
+          scoreString.includes("forfeit") ||
+          scoreString.includes("porażka techniczna");
+
+        const datetime = children[0].textContent!.trim().split(/\s+/);
+        const player1 = children[1].textContent!.trim();
+        const player2 = children[5].textContent!.trim();
+        const finalRaw = children[6].textContent!.trim().toLowerCase();
+        const final = finalRaw === "finał";
+
+        let setsWon = 0,
+          setsLost = 0,
+          player: string;
+
+        switch (normalizedPlayer) {
+          case player1:
+            player = player2;
+            if (scoreArray) {
+              setsWon = +scoreArray[1];
+              setsLost = +scoreArray[2];
+            }
+            break;
+          case player2:
+            player = player1;
+            if (scoreArray) {
+              setsWon = +scoreArray[2];
+              setsLost = +scoreArray[1];
+            }
+            break;
+          default:
+            throw Error("Error parsing matches: wrong players");
+        }
+
+        let prize =
+          (setsWon + Math.max(0, setsWon - setsLost - 1)) * normalizedSetbonus;
+
+        if (forfeit) {
+          prize /= 2;
+        }
+
+        if (final) {
+          prize +=
+            setsWon > setsLost ? normalizedFirstbonus : normalizedSecondbonus;
+        }
+
+        curMatches.push({
+          time: datetime[1],
+          player,
+          setsWon,
+          setsLost,
+          final,
+          forfeit,
+          prize,
+          bgClass: forfeit
+            ? "bg-neutral-300"
+            : setsWon > setsLost
+              ? final
+                ? "bg-green-400"
+                : "bg-green-200"
+              : setsWon < setsLost
+                ? final
+                  ? "bg-red-400"
+                  : "bg-red-200"
+                : "",
+        });
+      }
+
+      return matches;
+    },
+    normalizedPlayer,
+    normalizedFirstbonus,
+    normalizedSecondbonus,
+    normalizedSetbonus
+  );
+}
+
+try {
+  await clickOption("select2-jslimit", WszystkoOption);
+
+  const allPlayersTable = await page.waitForSelector("#jstable_plz", {
+    timeout: 2000,
+  });
+
+  if (!allPlayersTable) {
+    throw Error("Could not locate all players display option");
+  }
+
+  const playerLinkElement = await allPlayersTable.waitForSelector(
+    `a::-p-text(${normalizedPlayer})`,
+    { timeout: 2000 }
+  );
+
+  if (!playerLinkElement) {
+    throw Error(`Cound not locate player link for player: ${normalizedPlayer}`);
+  }
+
+  const playerLink = await playerLinkElement.evaluate((el) => el.href);
+
+  await page.goto(playerLink);
+
+  const matchesTab = await page.$("a::-p-text(Mecze)");
+
+  if (!matchesTab) {
+    throw Error("Could not locate matches tab inner");
+  }
+
+  matchesTab.click();
+
+  await page.waitForNetworkIdle({ timeout: 7000 });
+
+  await clickOption("select2-sid", normalizedLeague);
+
+  matches = await parseMatchesTable();
+} catch (e) {
+  error = "" + e;
+} finally {
+  browser.close();
+}
+---
+
+<Base>
+  <h1 class="text-center p-4 text-2xl font-bold">
+    {normalizedPlayer} ({normalizedLeague}, set:{normalizedSetbonus}, 1st:{
+      normalizedFirstbonus
+    }, 2nd:{normalizedSecondbonus})
+  </h1>
+  <main>
+    {
+      error || (
+        <div class="grid p-4 gap-y-4 gap-x-6 grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))]">
+          {matches.map(([date, match]) => (
+            <table class="match-table">
+              <thead class="font-semibold">
+                <tr>
+                  <td colspan="3">{date}</td>
+                  <td>{match.reduce((acc, m) => acc + m.prize, 0)}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {match.map((m) => (
+                  <tr class={m.bgClass}>
+                    <td>{m.time}</td>
+                    <td>{m.player}</td>
+                    <td>
+                      {m.setsWon}:{m.setsLost}
+                    </td>
+                    <td>{m.prize}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ))}
+        </div>
+      )
+    }
+  </main>
+</Base>
+
+<style>
+  .match-table {
+    table-layout: fixed;
+    border-collapse: collapse;
+  }
+
+  .match-table td {
+    padding: 0.2em 0.4em;
+  }
+
+  .match-table tbody td {
+    border: 1px solid #cdcdcd;
+    border-left: none;
+    border-right: none;
+  }
+
+  .match-table tbody td:first-child {
+    width: 5ch;
+  }
+
+  .match-table tbody td:nth-child(3) {
+    text-align: right;
+    width: 3ch;
+  }
+
+  .match-table td:last-child {
+    text-align: right;
+    width: 4ch;
+    text-decoration-line: none !important;
+  }
+</style>
