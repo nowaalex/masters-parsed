@@ -12,7 +12,7 @@ const Matches = () => {
   const name = searchParams.get("name");
   const league = searchParams.get("league");
 
-  const { isPending, error, data } = useQuery({
+  const { isPending, error, data, refetch } = useQuery({
     queryKey: ["playerMatches", name, league],
     queryFn: () =>
       fetch(`/api/player?name=${name}&league=${league}`).then((res) =>
@@ -57,7 +57,7 @@ const Matches = () => {
       {data.timeStamp !== -1 ? (
         <div className="grid p-4 gap-y-4 gap-x-6 grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))]">
           {data.data.map(([date, match]: any) => (
-            <table key={date} className="match-table">
+            <table key={date} className="table-fixed">
               <thead className="font-semibold">
                 <tr>
                   <td colSpan={3}>{date}</td>
@@ -66,9 +66,9 @@ const Matches = () => {
               <tbody>
                 {match.map((m: any) => (
                   <tr key={m.time}>
-                    <td>{m.time}</td>
-                    <td>{m.rival}</td>
-                    <td>
+                    <td className="w-[5ch]">{m.time}</td>
+                    <td className="px-2">{m.rival}</td>
+                    <td className="w-[3ch]">
                       {m.setsWon}:{m.setsLost}
                     </td>
                   </tr>
@@ -79,12 +79,12 @@ const Matches = () => {
         </div>
       ) : (
         <div className="mt-4 grid justify-items-center gap-2">
-          Data is not ready yet. Try to refresh this page in 10 seconds.
+          Data is not ready yet. Try to refetch in 10 seconds.
           <button
             className="p-2 border border-amber-600 bg-amber-50 hover:bg-amber-200 active:bg-slate-300"
-            onClick={() => window.location.reload()}
+            onClick={() => refetch()}
           >
-            Refresh
+            Refetch
           </button>
         </div>
       )}
