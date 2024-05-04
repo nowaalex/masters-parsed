@@ -1,0 +1,17 @@
+{
+  "include": ["src"],
+  "compilerOptions": {
+    "baseUrl": "src",
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "lib": ["DOM", "DOM.Iterable", "ES2023"],
+    "moduleResolution": "Bundler",
+    "module": "ESNext",
+    "target": "ESNext",
+    "strict": true,
+    "allowSyntheticDefaultImports": true,
+    "alwaysStrict": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  }
+}
