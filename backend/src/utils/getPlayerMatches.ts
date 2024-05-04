@@ -2,6 +2,7 @@ import puppeteer from "puppeteer";
 import { getOptionValueByText } from "./dropdowns";
 import extractMatchesFromElement from "./extractMatchesFromElement";
 import newPage from "./newPage";
+import type { MatchesEntryBackend } from "common-types";
 
 async function getPlayerMatches(
   playerLink: string,
@@ -17,7 +18,7 @@ async function getPlayerMatches(
   const leagueSelect = await page.waitForSelector("#sid", { timeout: 1000 });
   const leagueValue = await getOptionValueByText(leagueSelect, league);
 
-  let result: Awaited<ReturnType<typeof extractMatchesFromElement>> = [];
+  let result: MatchesEntryBackend["data"] = [];
 
   if (leagueValue) {
     const matchesQuantitySelect = await page.waitForSelector(

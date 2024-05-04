@@ -1,4 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { type QueryFunction, useQuery } from "@tanstack/react-query";
+import type { MatchesEntryFrontend } from "common-types";
 import BonusForm from "./BonusForm";
 import { useSearchParams } from "react-router-dom";
 
@@ -6,18 +7,23 @@ const rtf = new Intl.RelativeTimeFormat(navigator.language, {
   numeric: "always",
 });
 
+const queryFn: QueryFunction<
+  MatchesEntryFrontend,
+  [string, string, string]
+> = ({ queryKey }) =>
+  fetch(`/api/player?name=${queryKey[1]}&league=${queryKey[2]}`).then((res) =>
+    res.json()
+  );
+
 const Matches = () => {
   const [searchParams] = useSearchParams();
 
-  const name = searchParams.get("name");
-  const league = searchParams.get("league");
+  const name = searchParams.get("name") || "";
+  const league = searchParams.get("league") || "";
 
   const { isPending, error, data, refetch } = useQuery({
-    queryKey: ["playerMatches", name, league],
-    queryFn: () =>
-      fetch(`/api/player?name=${name}&league=${league}`).then((res) =>
-        res.json()
-      ),
+    queryKey: ["playerMatches", name, league] as const,
+    queryFn,
   });
 
   if (isPending) {

@@ -1,0 +1,10 @@
+{
+    "name": "common-types",
+    "type": "module",
+    "version": "0.0.1",
+    "dependencies": {
+      "typescript": "^5.4.5"
+    },
+    "exports": "./index.ts",
+    "devDependencies": {}
+  }

@@ -12,6 +12,7 @@
     "typescript": "^5.4.5"
   },
   "devDependencies": {
+    "common-types": "workspace:*",
     "@types/node": "^20.12.8",
     "esbuild": "^0.20.2",
     "puppeteer": "^22.7.1"

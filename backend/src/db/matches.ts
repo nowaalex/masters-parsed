@@ -1,29 +1,21 @@
 import getPlayerMatches from "utils/getPlayerMatches";
 import Players from "db/players";
+import type { MatchesEntryBackend, MatchesEntryFrontend } from "common-types";
 
 const REFETCH_INTERVAL = 1000 * 60 * 2;
-
-interface MatchesEntry {
-  isPending: boolean;
-  name: string;
-  league: string;
-  timeStamp: number;
-  data: Awaited<ReturnType<typeof getPlayerMatches>>;
-  error: string;
-}
 
 class Matches {
   /**
    * player matches by compound key (name_league)
    */
-  #map = new Map<string, MatchesEntry>();
+  #map = new Map<string, MatchesEntryBackend>();
 
   /**
    * Quantity of pending entries
    */
   #queueSize = 0;
 
-  async refetchEntryIfNeeded(entry: MatchesEntry) {
+  async refetchEntryIfNeeded(entry: MatchesEntryBackend) {
     if (entry.isPending) {
       return;
     }
@@ -63,7 +55,7 @@ class Matches {
     }
   }
 
-  get(name: string, league: string) {
+  get(name: string, league: string): MatchesEntryFrontend {
     const key = `${name}_${league}`;
     let entry = this.#map.get(key);
 
@@ -88,7 +80,7 @@ class Matches {
       timeStamp: entry.timeStamp,
       data: entry.data,
       error: entry.error,
-    } as const;
+    };
   }
 
   destroy() {

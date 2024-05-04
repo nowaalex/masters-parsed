@@ -1,14 +1,7 @@
-interface Match {
-  time: string;
-  rival: string;
-  setsWon: number;
-  setsLost: number;
-  forfeit: boolean;
-  final: boolean;
-}
+import type { Match, MatchesEntryBackend } from "common-types";
 
 function extractMatchesFromElement(el: Element, playerName: string) {
-  const matches: [string, Match[]][] = [];
+  const matches: MatchesEntryBackend["data"] = [];
   let curMatches: Match[] | null = null;
 
   for (const row of el.children) {
