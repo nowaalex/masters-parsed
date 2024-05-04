@@ -1,5 +1,20 @@
 import type { Browser } from "puppeteer";
 
+const JS_BLACKLIST = [
+  // irritating cookiebar
+  "enzuzo.com",
+  "gstatic.com",
+  "fxx.bcdn.net",
+  "connect.facebook.net",
+  "bootstrap",
+  // custom dropdowns, derived from regular selects
+  "select2",
+  // overlays
+  "lightbox",
+  "gk.scripts",
+  "k2.frontend",
+];
+
 async function newPage(browser: Browser) {
   const page = await browser.newPage();
   await page.setRequestInterception(true);
@@ -15,13 +30,7 @@ async function newPage(browser: Browser) {
         request.abort();
         break;
       case "script":
-        if (
-          // irritating cookiebar
-          path.includes("enzuzo.com") ||
-          path.includes("gstatic.com") ||
-          path.includes("fxx.bcdn.net") ||
-          path.includes("connect.facebook.net")
-        ) {
+        if (JS_BLACKLIST.some((suffix) => path.includes(suffix))) {
           request.abort();
         } else {
           request.continue();

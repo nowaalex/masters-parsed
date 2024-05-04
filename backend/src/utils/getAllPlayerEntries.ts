@@ -1,13 +1,15 @@
 import puppeteer from "puppeteer";
-import clickDropdownOption from "./clickDropdownOption";
+import { getOptionValueByText } from "./dropdowns";
 import newPage from "./newPage";
 
 async function getAllPlayerEntries() {
   const browser = await puppeteer.launch({ headless: true });
   const page = await newPage(browser);
   await page.goto("https://masterspl.com/players.html");
-  await clickDropdownOption(page, "#jslimit", "Wszystko", false);
-
+  const select = await page.$("#jslimit");
+  const allOption = await getOptionValueByText(select, "Wszystko");
+  await select.select("#jslimit", allOption);
+  await page.waitForNavigation({ timeout: 15000 });
   const result = await page.$eval("#jstable_plz", (table) => {
     const result = [];
 

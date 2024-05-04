@@ -55,6 +55,7 @@ class Matches {
         return;
       } catch (e) {
         entry.error = "" + e;
+        console.log(e);
       } finally {
         entry.isPending = false;
         --this.#queueSize;
