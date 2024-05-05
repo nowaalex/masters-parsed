@@ -1,15 +1,25 @@
 import { memo } from "react";
 import type { ComponentPropsWithoutRef } from "react";
 
-const BonusForm = (props: ComponentPropsWithoutRef<"form">) => (
+interface DefaultValues {
+  setBonus: number;
+  firstBonus: number;
+  secondBonus: number;
+}
+
+interface Props extends ComponentPropsWithoutRef<"form"> {
+  defaultValues: DefaultValues;
+}
+
+const BonusForm = ({ defaultValues, ...props }: Props) => (
   <form {...props}>
     <label className="grid">
       Set bonus
       <input
         required
         name="setBonus"
-        defaultValue="0"
         type="number"
+        defaultValue={defaultValues.setBonus}
         min="0"
         max="10000"
       />
@@ -19,7 +29,7 @@ const BonusForm = (props: ComponentPropsWithoutRef<"form">) => (
       <input
         required
         name="firstBonus"
-        defaultValue="0"
+        defaultValue={defaultValues.firstBonus}
         type="number"
         min="0"
         max="10000"
@@ -30,7 +40,7 @@ const BonusForm = (props: ComponentPropsWithoutRef<"form">) => (
       <input
         required
         name="secondBonus"
-        defaultValue="0"
+        defaultValue={defaultValues.secondBonus}
         type="number"
         min="0"
         max="10000"

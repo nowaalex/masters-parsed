@@ -8,7 +8,7 @@ import "./styles/base.css";
 const queryClient = new QueryClient();
 
 const Form = lazy(() => import("./components/Form"));
-const Matches = lazy(() => import("./components/Matches"));
+const Matches = lazy(() => import("./components/matches/Main"));
 
 const router = createBrowserRouter([
   {

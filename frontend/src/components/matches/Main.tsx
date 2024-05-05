@@ -1,7 +1,8 @@
 import { type QueryFunction, useQuery } from "@tanstack/react-query";
-import type { MatchesEntryFrontend } from "common-types";
-import BonusForm from "./BonusForm";
+import type { Match, MatchesEntryFrontend } from "common-types";
 import { useSearchParams } from "react-router-dom";
+import { FormEvent, useMemo, useReducer } from "react";
+import BonusForm from "./BonusForm";
 
 const rtf = new Intl.RelativeTimeFormat(navigator.language, {
   numeric: "always",
@@ -15,16 +16,81 @@ const queryFn: QueryFunction<
     res.json()
   );
 
+const initialBonusValues = {
+  setBonus: 0,
+  firstBonus: 0,
+  secondBonus: 0,
+};
+
+const getMatchRowColor = (m: Match) =>
+  m.forfeit
+    ? "bg-neutral-300"
+    : m.setsWon > m.setsLost
+    ? m.final
+      ? "bg-green-500"
+      : "bg-green-300"
+    : m.setsWon < m.setsLost
+    ? m.final
+      ? "bg-red-400"
+      : "bg-red-300"
+    : "";
+
+const reducer = (state: typeof initialBonusValues, e: FormEvent) => {
+  if (e.target instanceof HTMLInputElement) {
+    const { name, value } = e.target;
+    return {
+      ...state,
+      [name]: +value,
+    };
+  }
+  return state;
+};
+
 const Matches = () => {
   const [searchParams] = useSearchParams();
+
+  const [{ setBonus, firstBonus, secondBonus }, setBonusValues] = useReducer(
+    reducer,
+    initialBonusValues
+  );
 
   const name = searchParams.get("name") || "";
   const league = searchParams.get("league") || "";
 
   const { isPending, error, data, refetch } = useQuery({
-    queryKey: ["playerMatches", name, league] as const,
+    queryKey: ["playerMatches", name, league],
     queryFn,
   });
+
+  const matchesWithBonusesSource = isPending || error ? undefined : data.data;
+
+  const matchesWithBonuses = useMemo(
+    () =>
+      matchesWithBonusesSource?.map(([date, match]) => {
+        const matchWithBonuses = match.map((m) => {
+          let bonus =
+            (m.setsWon + Math.max(m.setsWon - m.setsLost - 1, 0)) * setBonus;
+
+          if (m.forfeit) {
+            bonus /= 2;
+          }
+
+          if (m.final) {
+            bonus += m.setsWon > m.setsLost ? firstBonus : secondBonus;
+          }
+
+          return {
+            ...m,
+            bonus,
+          };
+        });
+
+        const bonus = matchWithBonuses.reduce((acc, m) => acc + m.bonus, 0);
+
+        return [date, { match: matchWithBonuses, bonus }] as const;
+      }),
+    [matchesWithBonusesSource, setBonus, firstBonus, secondBonus]
+  );
 
   if (isPending) {
     return "Loading...";
@@ -38,11 +104,14 @@ const Matches = () => {
     <>
       <div className="flex flex-wrap items-center gap-x-10 gap-y-4 m-4">
         <div>
-          <h1 className="text-2xl font-semibold">{data.name}</h1>
-          <h2 className="text-lg font-medium">{data.league}</h2>
+          <h1 className="text-2xl font-semibold">{name}</h1>
+          <h2 className="text-lg font-medium">{league}</h2>
         </div>
-        <BonusForm className="flex gap-4" />
-
+        <BonusForm
+          className="flex gap-4"
+          defaultValues={initialBonusValues}
+          onChange={setBonusValues}
+        />
         <div className="inline-grid grid-cols-[auto,auto] gap-x-4">
           <span>Cached</span>
           <span>
@@ -61,23 +130,27 @@ const Matches = () => {
       </div>
       <hr className="my-4" />
       {data.timeStamp !== -1 ? (
-        data.data.length ? (
+        matchesWithBonuses!.length ? (
           <div className="grid p-4 gap-y-4 gap-x-6 grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))] items-start">
-            {data.data.map(([date, match]: any) => (
+            {matchesWithBonuses!.map(([date, matchStruct]) => (
               <table key={date} className="table-fixed">
                 <thead className="font-semibold">
                   <tr>
-                    <td colSpan={3}>{date}</td>
+                    <td className="pl-1" colSpan={3}>
+                      {date}
+                    </td>
+                    <td className="text-right pr-1">{matchStruct.bonus}</td>
                   </tr>
                 </thead>
                 <tbody>
-                  {match.map((m: any) => (
-                    <tr key={m.time}>
-                      <td className="w-[5ch]">{m.time}</td>
+                  {matchStruct.match.map((m) => (
+                    <tr key={m.time} className={getMatchRowColor(m)}>
+                      <td className="w-[5ch] pl-1">{m.time}</td>
                       <td className="px-2">{m.rival}</td>
                       <td className="w-[3ch]">
                         {m.setsWon}:{m.setsLost}
                       </td>
+                      <td className="w-[5ch] text-right pr-1">{m.bonus}</td>
                     </tr>
                   ))}
                 </tbody>
