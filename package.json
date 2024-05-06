@@ -3,7 +3,10 @@
   "type": "module",
   "private": true,
   "version": "0.0.1",
-  "scripts": {},
+  "scripts": {
+    "build": "pnpm -r build",
+    "serve": "pnpm -r serve"
+  },
   "dependencies": {},
   "devDependencies": {}
 }

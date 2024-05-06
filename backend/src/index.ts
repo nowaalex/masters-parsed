@@ -1,7 +1,12 @@
 import Fastify from "fastify";
+import dotenv from "dotenv";
 import Players from "db/players";
 import Matches from "db/matches";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
+
+dotenv.config({
+  path: ["../.env.local", "../.env"],
+});
 
 await Players.refresh();
 
@@ -30,7 +35,17 @@ fastify.route({
 
 fastify.get("/players", (request, reply) => reply.send(Players.list));
 
-fastify.listen({ port: 3000 }, (err) => {
+const { PORT, HOST } = process.env;
+
+if (!PORT) {
+  throw Error("process.env.PORT is not defined");
+}
+
+if (!HOST) {
+  throw Error("process.env.HOST is not defined");
+}
+
+fastify.listen({ port: +PORT, host: HOST }, (err) => {
   if (err) {
     throw err;
   }

@@ -4,7 +4,6 @@ services:
     networks:
       - app-network
     build:
-      context: ./backend
       dockerfile_inline: |
         FROM node:20-bullseye
         COPY . .
@@ -18,7 +17,7 @@ services:
         EXPOSE 3000
         CMD pnpm start
     ports:
-      - 3000:3000
+      - ${PORT}:3000
 networks:
     app-network:
         driver: bridge

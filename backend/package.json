@@ -4,16 +4,17 @@
   "version": "0.0.1",
   "scripts": {
     "build": "tsc && esbuild src/index.ts --bundle --platform=neutral --packages=external --outdir=dist",
-    "start": "node ./dist/index.js"
+    "serve": "node ./dist/index.js"
   },
   "dependencies": {
     "@fastify/type-provider-json-schema-to-ts": "^3.0.0",
+    "dotenv": "^16.4.5",
     "fastify": "^4.26.2",
     "typescript": "^5.4.5"
   },
   "devDependencies": {
-    "common-types": "workspace:*",
     "@types/node": "^20.12.8",
+    "common-types": "workspace:*",
     "esbuild": "^0.20.2",
     "puppeteer": "^22.7.1"
   }
