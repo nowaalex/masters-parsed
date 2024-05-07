@@ -8,6 +8,20 @@ dotenv.config({
   path: ["../.env.local", "../.env"],
 });
 
+const { BACKEND_FASTIFY_PORT, HOST } = process.env;
+
+if (!BACKEND_FASTIFY_PORT) {
+  throw Error("process.env.BACKEND_FASTIFY_PORT is not defined");
+}
+
+if (!HOST) {
+  throw Error("process.env.HOST is not defined");
+}
+
+const FASTIFY_OPTIONS = { port: +BACKEND_FASTIFY_PORT, host: HOST } as const;
+
+console.log({ FASTIFY_OPTIONS });
+
 await Players.refresh();
 
 const fastify = Fastify({
@@ -35,17 +49,7 @@ fastify.route({
 
 fastify.get("/players", (request, reply) => reply.send(Players.list));
 
-const { PORT, HOST } = process.env;
-
-if (!PORT) {
-  throw Error("process.env.PORT is not defined");
-}
-
-if (!HOST) {
-  throw Error("process.env.HOST is not defined");
-}
-
-fastify.listen({ port: +PORT, host: HOST }, (err) => {
+fastify.listen(FASTIFY_OPTIONS, (err) => {
   if (err) {
     throw err;
   }

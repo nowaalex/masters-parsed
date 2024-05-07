@@ -1,23 +1,21 @@
 services:
   backend:
     container_name: fastify
-    networks:
-      - app-network
+    network_mode: "host"
     build:
       dockerfile_inline: |
         FROM node:20-bullseye
+        WORKDIR /src
+        EXPOSE ${BACKEND_FASTIFY_PORT}
         COPY . .
         RUN apt-get -y update
-        RUN apt-get install -y wget
-        RUN wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+        RUN curl -LO https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
         RUN apt-get install -y ./google-chrome-stable_current_amd64.deb
+        RUN rm google-chrome-stable_current_amd64.deb
         RUN corepack enable
+        RUN ls -al .
         RUN pnpm i
-        RUN pnpm build
-        EXPOSE 3000
-        CMD pnpm start
+        RUN pnpm -F backend build
+        CMD pnpm -F backend serve
     ports:
-      - ${PORT}:3000
-networks:
-    app-network:
-        driver: bridge
+      - ${BACKEND_FASTIFY_PORT}:${BACKEND_FASTIFY_PORT}

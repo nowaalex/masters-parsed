@@ -8,7 +8,7 @@
     "serve": "vite preview"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.34.2",
+    "@tanstack/react-query": "^5.35.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router": "^6.23.0",
@@ -17,13 +17,13 @@
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
-    "@types/node": "^20.12.8",
+    "@types/node": "^20.12.10",
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.0",
     "autoprefixer": "^10.4.19",
     "common-types": "workspace:*",
     "postcss": "^8.4.38",
-    "puppeteer": "^22.7.1",
+    "puppeteer": "^22.8.0",
     "tailwindcss": "^3.4.3",
     "vite": "^5.2.11"
   }

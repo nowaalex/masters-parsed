@@ -9,13 +9,13 @@
   "dependencies": {
     "@fastify/type-provider-json-schema-to-ts": "^3.0.0",
     "dotenv": "^16.4.5",
-    "fastify": "^4.26.2",
+    "fastify": "^4.27.0",
     "typescript": "^5.4.5"
   },
   "devDependencies": {
-    "@types/node": "^20.12.8",
+    "@types/node": "^20.12.10",
     "common-types": "workspace:*",
-    "esbuild": "^0.20.2",
-    "puppeteer": "^22.7.1"
+    "esbuild": "^0.21.1",
+    "puppeteer": "^22.8.0"
   }
 }

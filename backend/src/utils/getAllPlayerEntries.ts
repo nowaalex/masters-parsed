@@ -1,9 +1,10 @@
 import puppeteer from "puppeteer";
 import { getOptionValueByText } from "./dropdowns";
 import newPage from "./newPage";
+import launchBrowser from "./launchBrowser";
 
 async function getAllPlayerEntries() {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await launchBrowser();
   const page = await newPage(browser);
   await page.goto("https://masterspl.com/players.html");
   const select = await page.$("#jslimit");

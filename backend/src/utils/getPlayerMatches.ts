@@ -3,16 +3,14 @@ import { getOptionValueByText } from "./dropdowns";
 import extractMatchesFromElement from "./extractMatchesFromElement";
 import newPage from "./newPage";
 import type { MatchesEntryBackend } from "common-types";
+import launchBrowser from "./launchBrowser";
 
 async function getPlayerMatches(
   playerLink: string,
   playerName: string,
   league: string
 ) {
-  const browser = await puppeteer.launch({
-    headless: true,
-    defaultViewport: { width: 1900, height: 1000 },
-  });
+  const browser = await launchBrowser();
   const page = await newPage(browser);
   await page.goto(playerLink);
   const leagueSelect = await page.waitForSelector("#sid", { timeout: 1000 });
