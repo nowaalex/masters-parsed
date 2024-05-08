@@ -1,0 +1,22 @@
+# ui app upstream
+upstream ui {
+  server ui:${FRONTEND_UI_PORT};
+}
+
+# api app upstream
+upstream fastify {
+  server fastify:${BACKEND_FASTIFY_PORT};
+}
+
+server {
+  listen 80;
+
+  location / {
+    proxy_pass http://ui;
+  }
+
+  location /api {
+      rewrite /api/(.*) /$1 break;
+      proxy_pass http://fastify;
+  }
+}
