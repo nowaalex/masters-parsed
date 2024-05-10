@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 import { Form as InnerForm } from "react-router-dom";
 
 const Leagues = [
@@ -8,13 +9,17 @@ const Leagues = [
   "Liga kobiet A",
   "Liga kobiet B",
   "Superliga",
-];
+] as const;
 
 const Form = () => {
   const { isPending, error, data } = useQuery({
     queryKey: ["players"],
     queryFn: () => fetch("/api/players").then((res) => res.json()),
   });
+
+  useEffect(() => {
+    document.title = "Masters parsed";
+  }, []);
 
   if (isPending) {
     return "Loading all players...";

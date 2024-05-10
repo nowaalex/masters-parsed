@@ -1,7 +1,7 @@
 import { type QueryFunction, useQuery } from "@tanstack/react-query";
 import type { Match, MatchesEntryFrontend } from "common-types";
-import { useSearchParams } from "react-router-dom";
-import { FormEvent, useMemo, useReducer } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { FormEvent, useEffect, useMemo, useReducer } from "react";
 import BonusForm from "./BonusForm";
 
 const rtf = new Intl.RelativeTimeFormat(navigator.language, {
@@ -35,6 +35,36 @@ const getMatchRowColor = (m: Match) =>
       : "bg-red-300"
     : "";
 
+const getMatchesWithBonuses = (
+  matches: MatchesEntryFrontend["data"],
+  setBonus: number,
+  firstBonus: number,
+  secondBonus: number
+) =>
+  matches.map(([date, match]) => {
+    const matchWithBonuses = match.map((m) => {
+      let bonus =
+        (m.setsWon + Math.max(m.setsWon - m.setsLost - 1, 0)) * setBonus;
+
+      if (m.forfeit) {
+        bonus /= 2;
+      }
+
+      if (m.final) {
+        bonus += m.setsWon > m.setsLost ? firstBonus : secondBonus;
+      }
+
+      return {
+        ...m,
+        bonus,
+      };
+    });
+
+    const bonus = matchWithBonuses.reduce((acc, m) => acc + m.bonus, 0);
+
+    return [date, { match: matchWithBonuses, bonus }] as const;
+  });
+
 const reducer = (state: typeof initialBonusValues, e: FormEvent) => {
   if (e.target instanceof HTMLInputElement) {
     const { name, value } = e.target;
@@ -57,6 +87,12 @@ const Matches = () => {
   const name = searchParams.get("name") || "";
   const league = searchParams.get("league") || "";
 
+  const title = `${name} | ${league}`;
+
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+
   const { isPending, error, data, refetch } = useQuery({
     queryKey: ["playerMatches", name, league],
     queryFn,
@@ -66,29 +102,13 @@ const Matches = () => {
 
   const matchesWithBonuses = useMemo(
     () =>
-      matchesWithBonusesSource?.map(([date, match]) => {
-        const matchWithBonuses = match.map((m) => {
-          let bonus =
-            (m.setsWon + Math.max(m.setsWon - m.setsLost - 1, 0)) * setBonus;
-
-          if (m.forfeit) {
-            bonus /= 2;
-          }
-
-          if (m.final) {
-            bonus += m.setsWon > m.setsLost ? firstBonus : secondBonus;
-          }
-
-          return {
-            ...m,
-            bonus,
-          };
-        });
-
-        const bonus = matchWithBonuses.reduce((acc, m) => acc + m.bonus, 0);
-
-        return [date, { match: matchWithBonuses, bonus }] as const;
-      }),
+      matchesWithBonusesSource &&
+      getMatchesWithBonuses(
+        matchesWithBonusesSource,
+        setBonus,
+        firstBonus,
+        secondBonus
+      ),
     [matchesWithBonusesSource, setBonus, firstBonus, secondBonus]
   );
 
@@ -103,6 +123,9 @@ const Matches = () => {
   return (
     <>
       <div className="flex flex-wrap items-center gap-x-10 gap-y-4 m-4">
+        <Link to="/" className="text-2xl">
+          &larr;
+        </Link>
         <div>
           <h1 className="text-2xl font-semibold">{name}</h1>
           <h2 className="text-lg font-medium">{league}</h2>

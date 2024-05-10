@@ -1,1 +1,2 @@
-`docker compose --env.file .env up`
+`docker compose build`
+`docker compose up`
