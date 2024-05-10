@@ -35,6 +35,25 @@ const getMatchRowColor = (m: Match) =>
       : "bg-red-300"
     : "";
 
+const getMatchBonus = (
+  m: Match,
+  setBonus: number,
+  firstBonus: number,
+  secondBonus: number
+) => {
+  let bonus = (m.setsWon + Math.max(m.setsWon - m.setsLost - 1, 0)) * setBonus;
+
+  if (m.forfeit) {
+    bonus /= 2;
+  }
+
+  if (m.final) {
+    bonus += m.setsWon > m.setsLost ? firstBonus : secondBonus;
+  }
+
+  return bonus;
+};
+
 const getMatchesWithBonuses = (
   matches: MatchesEntryFrontend["data"],
   setBonus: number,
@@ -42,27 +61,18 @@ const getMatchesWithBonuses = (
   secondBonus: number
 ) =>
   matches.map(([date, match]) => {
-    const matchWithBonuses = match.map((m) => {
-      let bonus =
-        (m.setsWon + Math.max(m.setsWon - m.setsLost - 1, 0)) * setBonus;
+    const matchWithBonuses = match.map((m) => ({
+      ...m,
+      bonus: getMatchBonus(m, setBonus, firstBonus, secondBonus),
+    }));
 
-      if (m.forfeit) {
-        bonus /= 2;
-      }
-
-      if (m.final) {
-        bonus += m.setsWon > m.setsLost ? firstBonus : secondBonus;
-      }
-
-      return {
-        ...m,
-        bonus,
-      };
-    });
-
-    const bonus = matchWithBonuses.reduce((acc, m) => acc + m.bonus, 0);
-
-    return [date, { match: matchWithBonuses, bonus }] as const;
+    return [
+      date,
+      {
+        match: matchWithBonuses,
+        bonus: matchWithBonuses.reduce((acc, m) => acc + m.bonus, 0),
+      },
+    ] as const;
   });
 
 const reducer = (state: typeof initialBonusValues, e: FormEvent) => {
