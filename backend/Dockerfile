@@ -1,12 +1,19 @@
-FROM node:22-alpine
-WORKDIR /src
-EXPOSE ${BACKEND_FASTIFY_PORT}
-COPY ../.env ../.env.local ../pnpm* package.json  ./
-COPY ../common-types/ ./common-types/
-COPY . .
-ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
-RUN apk add --no-cache chromium
+FROM node:22-alpine as base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
-RUN pnpm i
+RUN apk add chromium
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+FROM base as build
+WORKDIR /src
+COPY ../ ./
+RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
 RUN pnpm -F backend build
-CMD pnpm -F backend serve
+RUN pnpm -F backend deploy --prod /prod
+
+FROM base as serve
+WORKDIR /src
+COPY --from=build /prod .
+EXPOSE ${BACKEND_FASTIFY_PORT}
+CMD pnpm serve

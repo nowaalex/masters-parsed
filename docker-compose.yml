@@ -3,17 +3,15 @@ services:
     env_file: .env
     build:
       dockerfile: ./frontend/Dockerfile
-    ports:
-      - ${FRONTEND_UI_PORT}:${FRONTEND_UI_PORT}
-  reverse-proxy:
-    build:
-      dockerfile: ./nginx/Dockerfile
-    ports:
-      - ${REVERSE_PROXY_PORT}:80
-    env_file: .env
   fastify:
     env_file: .env
     build:
       dockerfile: ./backend/Dockerfile
     ports:
       - ${BACKEND_FASTIFY_PORT}:${BACKEND_FASTIFY_PORT}
+  reverse-proxy:
+    build:
+      dockerfile: ./reverse-proxy/Dockerfile
+    ports:
+      - ${REVERSE_PROXY_PORT}:${REVERSE_PROXY_PORT}
+    env_file: .env

@@ -8,5 +8,6 @@
     "serve": "pnpm -r serve"
   },
   "dependencies": {},
-  "devDependencies": {}
+  "devDependencies": {},
+  "packageManager": "pnpm@9.1.0"
 }

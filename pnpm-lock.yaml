@@ -19,9 +19,9 @@ importers:
       fastify:
         specifier: ^4.27.0
         version: 4.27.0
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
+      puppeteer:
+        specifier: ^22.8.0
+        version: 22.8.0(typescript@5.4.5)
     devDependencies:
       '@types/node':
         specifier: ^20.12.10
@@ -32,9 +32,9 @@ importers:
       esbuild:
         specifier: ^0.21.1
         version: 0.21.1
-      puppeteer:
-        specifier: ^22.8.0
-        version: 22.8.0(typescript@5.4.5)
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
 
   common-types:
     dependencies:
@@ -59,9 +59,6 @@ importers:
       react-router-dom:
         specifier: ^6.23.0
         version: 6.23.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      typescript:
-        specifier: ^5.4.5
-        version: 5.4.5
     devDependencies:
       '@tailwindcss/forms':
         specifier: ^0.5.7
@@ -84,12 +81,12 @@ importers:
       postcss:
         specifier: ^8.4.38
         version: 8.4.38
-      puppeteer:
-        specifier: ^22.8.0
-        version: 22.8.0(typescript@5.4.5)
       tailwindcss:
         specifier: ^3.4.3
         version: 3.4.3
+      typescript:
+        specifier: ^5.4.5
+        version: 5.4.5
       vite:
         specifier: ^5.2.11
         version: 5.2.11(@types/node@20.12.11)
