@@ -1,24 +1,19 @@
 import Fastify from "fastify";
-import dotenv from "dotenv";
 import Players from "db/players";
 import Matches from "db/matches";
+import { kill } from "utils/browser";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
-dotenv.config({
-  path: ["../.env.local", "../.env"],
-});
-
-const { BACKEND_FASTIFY_PORT, HOST } = process.env;
+const { BACKEND_FASTIFY_PORT } = process.env;
 
 if (!BACKEND_FASTIFY_PORT) {
   throw Error("process.env.BACKEND_FASTIFY_PORT is not defined");
 }
 
-if (!HOST) {
-  throw Error("process.env.HOST is not defined");
-}
-
-const FASTIFY_OPTIONS = { port: +BACKEND_FASTIFY_PORT, host: HOST } as const;
+const FASTIFY_OPTIONS = {
+  port: +BACKEND_FASTIFY_PORT,
+  host: "0.0.0.0",
+} as const;
 
 console.log({ FASTIFY_OPTIONS });
 
@@ -57,6 +52,7 @@ fastify.listen(FASTIFY_OPTIONS, (err) => {
 
 [`SIGINT`, `SIGUSR1`, `SIGUSR2`, `exit`, `SIGTERM`].forEach((evt) =>
   process.on(evt, () => {
+    kill();
     fastify.close();
     Players.destroy();
     Matches.destroy();

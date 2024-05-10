@@ -1,51 +1,52 @@
-import puppeteer from "puppeteer";
+import type { Page } from "puppeteer";
 import { getOptionValueByText } from "./dropdowns";
 import extractMatchesFromElement from "./extractMatchesFromElement";
-import newPage from "./newPage";
-import type { MatchesEntryBackend } from "common-types";
-import launchBrowser from "./launchBrowser";
+import { open, close } from "./page";
 
 async function getPlayerMatches(
   playerLink: string,
   playerName: string,
   league: string
 ) {
-  const browser = await launchBrowser();
-  const page = await newPage(browser);
-  await page.goto(playerLink);
-  const leagueSelect = await page.waitForSelector("#sid", { timeout: 1000 });
-  const leagueValue = await getOptionValueByText(leagueSelect, league);
+  let page: Page = null;
 
-  let result: MatchesEntryBackend["data"] = [];
+  try {
+    page = await open();
+    await page.goto(playerLink);
+    const leagueSelect = await page.waitForSelector("#sid", { timeout: 3000 });
+    const leagueValue = await getOptionValueByText(leagueSelect, league);
 
-  if (leagueValue) {
-    const matchesQuantitySelect = await page.waitForSelector(
-      "#stab_matches #jslimit",
-      { timeout: 1000 }
-    );
-    const allOptionValue = await getOptionValueByText(
-      matchesQuantitySelect,
-      "Wszystko"
-    );
-    await matchesQuantitySelect.select(allOptionValue);
-    await page.waitForNavigation({
-      timeout: 30000,
-    });
+    if (leagueValue) {
+      const matchesQuantitySelect = await page.waitForSelector(
+        "#stab_matches #jslimit",
+        { timeout: 3000 }
+      );
+      const allOptionValue = await getOptionValueByText(
+        matchesQuantitySelect,
+        "Wszystko"
+      );
+      await matchesQuantitySelect.select(allOptionValue);
+      await page.waitForNavigation({
+        timeout: 40000,
+      });
 
-    await page.select("#sid", leagueValue);
-    await page.waitForNavigation({
-      timeout: 30000,
-    });
-    result = await page.$eval(
-      "#stab_matches .jstable",
-      extractMatchesFromElement,
-      playerName
-    );
+      await page.select("#sid", leagueValue);
+      await page.waitForNavigation({
+        timeout: 40000,
+      });
+      const result = await page.$eval(
+        "#stab_matches .jstable",
+        extractMatchesFromElement,
+        playerName
+      );
+      return result;
+    }
+  } catch (e) {
+    throw e;
+  } finally {
+    if (page) {
+      close(page);
+    }
   }
-
-  await browser.close();
-
-  return result;
 }
-
 export default getPlayerMatches;

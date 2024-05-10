@@ -10,8 +10,8 @@ services:
     ports:
       - ${BACKEND_FASTIFY_PORT}:${BACKEND_FASTIFY_PORT}
   reverse-proxy:
+    env_file: .env
     build:
       dockerfile: ./reverse-proxy/Dockerfile
     ports:
       - ${REVERSE_PROXY_PORT}:${REVERSE_PROXY_PORT}
-    env_file: .env
