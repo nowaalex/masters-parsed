@@ -70,15 +70,16 @@ const getMatchesWithBonuses = (
 const reducer = (state: Bonus, e: FormEvent) => {
   if (e.target instanceof HTMLInputElement) {
     const { name, value } = e.target;
-    return {
-      ...state,
-      [name]: +value,
-    };
+    const numericValue = Number.parseInt(value, 10);
+    if (Number.isFinite(numericValue)) {
+      return {
+        ...state,
+        [name]: numericValue,
+      };
+    }
   }
   return state;
 };
-
-const v = (str: string) => str.replace(" ", "+");
 
 const Matches = () => {
   const [searchParams] = useSearchParams();
@@ -171,7 +172,10 @@ const Matches = () => {
                       <Link
                         className="hover:underline"
                         to={{
-                          search: `?name=${v(m.rival)}&league=${v(league)}`,
+                          search: new URLSearchParams({
+                            name: m.rival,
+                            league,
+                          }).toString(),
                         }}
                       >
                         {m.rival}
