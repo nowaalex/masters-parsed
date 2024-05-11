@@ -1,51 +1,39 @@
 import { memo } from "react";
 import type { ComponentPropsWithoutRef } from "react";
 
-interface DefaultValues {
-  setBonus: number;
-  firstBonus: number;
-  secondBonus: number;
+export interface Bonus {
+  /** bonus for set won */
+  set: number;
+  /** bonus for first place */
+  first: number;
+  /** bonus for second place */
+  second: number;
 }
 
-interface Props extends ComponentPropsWithoutRef<"form"> {
-  defaultValues: DefaultValues;
-}
+const FIELDS = [
+  ["set", "Set bonus"],
+  ["first", "1 bonus"],
+  ["second", "2 bonus"],
+] as const satisfies [keyof Bonus, string][];
 
-const BonusForm = ({ defaultValues, ...props }: Props) => (
+interface Props extends ComponentPropsWithoutRef<"form"> {}
+
+const BonusForm = (props: Props) => (
   <form {...props}>
-    <label className="grid">
-      Set bonus
-      <input
-        required
-        name="setBonus"
-        type="number"
-        defaultValue={defaultValues.setBonus}
-        min="0"
-        max="10000"
-      />
-    </label>
-    <label className="grid">
-      First bonus
-      <input
-        required
-        name="firstBonus"
-        defaultValue={defaultValues.firstBonus}
-        type="number"
-        min="0"
-        max="10000"
-      />
-    </label>
-    <label className="grid">
-      Second bonus
-      <input
-        required
-        name="secondBonus"
-        defaultValue={defaultValues.secondBonus}
-        type="number"
-        min="0"
-        max="10000"
-      />
-    </label>
+    {FIELDS.map(([name, label]) => (
+      <label className="grid flex-auto" key={name}>
+        {label}
+        <input
+          required
+          name={name}
+          type="number"
+          defaultValue={0}
+          min="0"
+          max="9999"
+          className="min-w-[4ch]"
+        />
+      </label>
+    ))}
   </form>
 );
 

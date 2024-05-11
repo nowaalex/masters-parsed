@@ -2,11 +2,8 @@ import { type QueryFunction, useQuery } from "@tanstack/react-query";
 import type { Match, MatchesEntryFrontend } from "common-types";
 import { Link, useSearchParams } from "react-router-dom";
 import { FormEvent, useEffect, useMemo, useReducer } from "react";
-import BonusForm from "./BonusForm";
-
-const rtf = new Intl.RelativeTimeFormat(navigator.language, {
-  numeric: "always",
-});
+import BonusForm, { type Bonus } from "./BonusForm";
+import SystemInfo from "./SystemInfo";
 
 const queryFn: QueryFunction<
   MatchesEntryFrontend,
@@ -17,10 +14,10 @@ const queryFn: QueryFunction<
   );
 
 const initialBonusValues = {
-  setBonus: 0,
-  firstBonus: 0,
-  secondBonus: 0,
-};
+  set: 0,
+  first: 0,
+  second: 0,
+} as const satisfies Bonus;
 
 const getMatchRowColor = (m: Match) =>
   m.forfeit
@@ -35,35 +32,30 @@ const getMatchRowColor = (m: Match) =>
       : "bg-red-300"
     : "";
 
-const getMatchBonus = (
-  m: Match,
-  setBonus: number,
-  firstBonus: number,
-  secondBonus: number
-) => {
-  let bonus = (m.setsWon + Math.max(m.setsWon - m.setsLost - 1, 0)) * setBonus;
+const getMatchBonus = (match: Match, bonus: Bonus) => {
+  let result =
+    (match.setsWon + Math.max(match.setsWon - match.setsLost - 1, 0)) *
+    bonus.set;
 
-  if (m.forfeit) {
-    bonus /= 2;
+  if (match.forfeit) {
+    result /= 2;
   }
 
-  if (m.final) {
-    bonus += m.setsWon > m.setsLost ? firstBonus : secondBonus;
+  if (match.final) {
+    result += match.setsWon > match.setsLost ? bonus.first : bonus.second;
   }
 
-  return bonus;
+  return result;
 };
 
 const getMatchesWithBonuses = (
   matches: MatchesEntryFrontend["data"],
-  setBonus: number,
-  firstBonus: number,
-  secondBonus: number
+  bonus: Bonus
 ) =>
   matches.map(([date, match]) => {
     const matchWithBonuses = match.map((m) => ({
       ...m,
-      bonus: getMatchBonus(m, setBonus, firstBonus, secondBonus),
+      bonus: getMatchBonus(m, bonus),
     }));
 
     return [
@@ -75,7 +67,7 @@ const getMatchesWithBonuses = (
     ] as const;
   });
 
-const reducer = (state: typeof initialBonusValues, e: FormEvent) => {
+const reducer = (state: Bonus, e: FormEvent) => {
   if (e.target instanceof HTMLInputElement) {
     const { name, value } = e.target;
     return {
@@ -86,13 +78,12 @@ const reducer = (state: typeof initialBonusValues, e: FormEvent) => {
   return state;
 };
 
+const v = (str: string) => str.replace(" ", "+");
+
 const Matches = () => {
   const [searchParams] = useSearchParams();
 
-  const [{ setBonus, firstBonus, secondBonus }, setBonusValues] = useReducer(
-    reducer,
-    initialBonusValues
-  );
+  const [bonus, setBonusValues] = useReducer(reducer, initialBonusValues);
 
   const name = searchParams.get("name") || "";
   const league = searchParams.get("league") || "";
@@ -113,13 +104,8 @@ const Matches = () => {
   const matchesWithBonuses = useMemo(
     () =>
       matchesWithBonusesSource &&
-      getMatchesWithBonuses(
-        matchesWithBonusesSource,
-        setBonus,
-        firstBonus,
-        secondBonus
-      ),
-    [matchesWithBonusesSource, setBonus, firstBonus, secondBonus]
+      getMatchesWithBonuses(matchesWithBonusesSource, bonus),
+    [matchesWithBonusesSource, bonus]
   );
 
   if (isPending) {
@@ -132,68 +118,30 @@ const Matches = () => {
 
   return (
     <>
-      <div className="flex flex-wrap items-center gap-x-10 gap-y-4 m-4">
-        <Link to="/" className="text-2xl">
-          &larr;
-        </Link>
-        <div>
-          <h1 className="text-2xl font-semibold">{name}</h1>
-          <h2 className="text-lg font-medium">{league}</h2>
+      <div className="flex flex-wrap justify-evenly gap-x-12 gap-y-6 m-4">
+        <div className="flex flex-auto items-center gap-4 w-full md:w-auto justify-center">
+          <Link to="/" className="text-2xl">
+            &larr;
+          </Link>
+          <div>
+            <h1 className="text-2xl font-semibold">{name}</h1>
+            <h2 className="text-lg font-medium">{league}</h2>
+          </div>
         </div>
         <BonusForm
-          className="flex gap-4"
-          defaultValues={initialBonusValues}
+          key={league}
+          className="flex flex-auto justify-center gap-4"
           onChange={setBonusValues}
         />
-        <div className="inline-grid grid-cols-[auto,auto] gap-x-4">
-          <span>Cached</span>
-          <span>
-            {data.timeStamp === -1
-              ? "-"
-              : rtf.format(
-                  Math.round((data.timeStamp - Date.now()) / 1000),
-                  "seconds"
-                )}
-          </span>
-          <span>Queue size</span>
-          <span>{data.queueSize}</span>
-          <span>Last error</span>
-          <span>{data.error || "-"}</span>
-        </div>
+        <SystemInfo
+          timeStamp={data.timeStamp}
+          error={data.error}
+          queueSize={data.queueSize}
+          className="flex-auto text-center"
+        />
       </div>
       <hr className="my-4" />
-      {data.timeStamp !== -1 ? (
-        matchesWithBonuses!.length ? (
-          <div className="grid p-4 gap-y-4 gap-x-6 grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))] items-start">
-            {matchesWithBonuses!.map(([date, matchStruct]) => (
-              <table key={date} className="table-fixed">
-                <thead className="font-semibold">
-                  <tr>
-                    <td className="pl-1" colSpan={3}>
-                      {date}
-                    </td>
-                    <td className="text-right pr-1">{matchStruct.bonus}</td>
-                  </tr>
-                </thead>
-                <tbody>
-                  {matchStruct.match.map((m) => (
-                    <tr key={m.time} className={getMatchRowColor(m)}>
-                      <td className="w-[5ch] pl-1">{m.time}</td>
-                      <td className="px-2">{m.rival}</td>
-                      <td className="w-[3ch]">
-                        {m.setsWon}:{m.setsLost}
-                      </td>
-                      <td className="w-[5ch] text-right pr-1">{m.bonus}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center">No matches found</div>
-        )
-      ) : (
+      {data.timeStamp === -1 ? (
         <div className="grid justify-items-center gap-2">
           Data is not ready yet. Try to refetch in 10 seconds.
           <button
@@ -203,6 +151,44 @@ const Matches = () => {
             Refetch
           </button>
         </div>
+      ) : matchesWithBonuses?.length ? (
+        <div className="grid p-4 gap-y-4 gap-x-6 grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))] items-start">
+          {matchesWithBonuses.map(([date, matchStruct]) => (
+            <table key={date} className="table-fixed">
+              <thead className="font-semibold">
+                <tr>
+                  <td className="pl-1" colSpan={3}>
+                    {date}
+                  </td>
+                  <td className="text-right pr-1">{matchStruct.bonus}</td>
+                </tr>
+              </thead>
+              <tbody>
+                {matchStruct.match.map((m) => (
+                  <tr key={m.time} className={getMatchRowColor(m)}>
+                    <td className="w-[5ch] pl-1">{m.time}</td>
+                    <td className="px-2">
+                      <Link
+                        className="hover:underline"
+                        to={{
+                          search: `?name=${v(m.rival)}&league=${v(league)}`,
+                        }}
+                      >
+                        {m.rival}
+                      </Link>
+                    </td>
+                    <td className="w-[3ch]">
+                      {m.setsWon}:{m.setsLost}
+                    </td>
+                    <td className="w-[5ch] text-right pr-1">{m.bonus}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ))}
+        </div>
+      ) : (
+        <div className="text-center">No matches found</div>
       )}
     </>
   );
