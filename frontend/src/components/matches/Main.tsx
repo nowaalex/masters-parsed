@@ -3,6 +3,7 @@ import type { Match, MatchesEntryFrontend } from "common-types";
 import { Link, useSearchParams } from "react-router-dom";
 import { FormEvent, useEffect, useMemo, useReducer } from "react";
 import BonusForm, { type Bonus } from "./BonusForm";
+import getMatchBonus from "../../utils/getMatchBonus";
 import SystemInfo from "./SystemInfo";
 
 const queryFn: QueryFunction<
@@ -31,22 +32,6 @@ const getMatchRowColor = (m: Match) =>
       ? "bg-red-400"
       : "bg-red-300"
     : "";
-
-const getMatchBonus = (match: Match, bonus: Bonus) => {
-  let result =
-    (match.setsWon + Math.max(match.setsWon - match.setsLost - 1, 0)) *
-    bonus.set;
-
-  if (match.forfeit) {
-    result /= 2;
-  }
-
-  if (match.final) {
-    result += match.setsWon > match.setsLost ? bonus.first : bonus.second;
-  }
-
-  return result;
-};
 
 const getMatchesWithBonuses = (
   matches: MatchesEntryFrontend["data"],

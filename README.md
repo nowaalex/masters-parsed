@@ -3,12 +3,6 @@
 This utility parses [https://masterspl.com/](https://masterspl.com/) website
 with the help of [headless chrome](https://developer.chrome.com/blog/headless-chrome) and provides more beautiful matches statistics.
 
-## Why it is not deployed?
-
-1. I am lazy
-
-2. Free hosting plans are too limited to run it
-
 ## Installation
 
 1. Clone this repository (if you know how) **or** select `master` branch, download all files and extract downloaded archive
@@ -33,3 +27,18 @@ with the help of [headless chrome](https://developer.chrome.com/blog/headless-ch
 3. Open browser and go to "http://localhost"
 
 4. To kill all running services press `Ctrl+C` in the console. After this console could be closed.
+
+> [!CAUTION]
+> Remember to kill running services, they may consume memory/battery.
+
+## FAQ
+
+### Why it is not deployed?
+
+1. I am lazy
+
+2. Free hosting plans are too limited to run it
+
+### How exactly are bonuses calculated?
+
+[getMatchBonus](frontend/src/utils/getMatchBonus.ts) function reference

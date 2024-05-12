@@ -8,6 +8,7 @@
     "moduleResolution": "Bundler",
     "module": "ESNext",
     "target": "ESNext",
+    "types": ["node", "react", "react-dom"],
     "strict": true,
     "allowSyntheticDefaultImports": true,
     "alwaysStrict": true,
