@@ -1,15 +1,22 @@
 # Masters parser
 
-This utility parses [https://masterspl.com/](https://masterspl.com/) website and provides more beautiful matches statistics.
+This utility parses [https://masterspl.com/](https://masterspl.com/) website
+with the help of [headless chrome](https://developer.chrome.com/blog/headless-chrome) and provides more beautiful matches statistics.
+
+## Why it is not deployed?
+
+1. I am lazy
+
+2. Free hosting plans are too limited to run it
 
 ## Installation
 
-1. Clone this repository (if you know how) or select "master" branch, download all files and extract downloaded archive
+1. Clone this repository (if you know how) **or** select `master` branch, download all files and extract downloaded archive
    ![masters howto clone](public/masters-howto-clone.png)
 
 2. Open the folder with extracted files
 
-3. Create empty file named ".env" and paste everything from ".env.template" into it
+3. Create empty file named `.env` and paste everything from `.env.template` into it
 
 4. Install [docker](https://docs.docker.com/get-docker/)
 
