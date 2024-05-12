@@ -42,4 +42,5 @@ with the help of [headless chrome](https://developer.chrome.com/blog/headless-ch
 ### How exactly are bonuses calculated?
 
 [getMatchBonus](frontend/src/utils/getMatchBonus.ts) function is responsible for calculating a bonus for a single match.
-https://github.com/nowaalex/masters-parsed/blob/master/frontend/src/utils/getMatchBonus.ts#L3-
+
+https://github.com/nowaalex/masters-parsed/blob/master/frontend/src/utils/getMatchBonus.ts#L4-L26
