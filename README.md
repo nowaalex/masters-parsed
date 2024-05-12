@@ -5,7 +5,7 @@ This utility parses [https://masterspl.com/](https://masterspl.com/) website and
 ## Installation
 
 1. Clone this repository (if you know how) or select "master" branch, download all files and extract downloaded archive
-   ![masters howto clone](https://github.com/nowaalex/masters-parsed/tree/master/public/masters-howto-clone.png)
+   ![masters howto clone](public/masters-howto-clone.png)
 
 2. Open the folder with extracted files
 
