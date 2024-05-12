@@ -2,7 +2,7 @@ import { memo } from "react";
 import type { ComponentPropsWithoutRef } from "react";
 
 export interface Bonus {
-  /** bonus for set won */
+  /** bonus for each set won */
   set: number;
   /** bonus for first place */
   first: number;
@@ -16,9 +16,7 @@ const FIELDS = [
   ["second", "2 bonus"],
 ] as const satisfies [keyof Bonus, string][];
 
-interface Props extends ComponentPropsWithoutRef<"form"> {}
-
-const BonusForm = (props: Props) => (
+const BonusForm = (props: ComponentPropsWithoutRef<"form">) => (
   <form {...props}>
     {FIELDS.map(([name, label]) => (
       <label className="grid flex-auto" key={name}>

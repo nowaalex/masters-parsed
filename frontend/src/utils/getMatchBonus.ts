@@ -12,17 +12,17 @@ function getMatchBonus(match: Match, bonus: Bonus) {
   const victory = match.setsWon > match.setsLost;
   const rivalSets = victory ? match.setsWon - match.setsLost - 1 : 0;
 
-  let result = (match.setsWon + rivalSets) * bonus.set;
+  let matchBonus = (match.setsWon + rivalSets) * bonus.set;
 
   if (match.forfeit) {
-    result /= 2;
+    matchBonus /= 2;
   }
 
   if (match.final) {
-    result += victory ? bonus.first : bonus.second;
+    matchBonus += victory ? bonus.first : bonus.second;
   }
 
-  return result;
+  return matchBonus;
 }
 
 export default getMatchBonus;
