@@ -24,7 +24,7 @@ with the help of [headless chrome](https://developer.chrome.com/blog/headless-ch
 
 2. Run `docker compose up` and leave console opened
 
-3. Open browser and go to "http://localhost"
+3. Open browser and go to http://localhost
 
 4. To kill all running services press `Ctrl+C` in the console. After this console could be closed.
 
