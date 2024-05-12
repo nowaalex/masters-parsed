@@ -1,29 +1,32 @@
 import { defineConfig, loadEnv } from "vite";
 
-export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, "../", "");
+export default defineConfig(({ mode, command }) => {
+  switch (command) {
+    case "build":
+      return {};
 
-  const { FRONTEND_UI_PORT, BACKEND_FASTIFY_PORT } = env;
+    case "serve":
+      const env = loadEnv(mode, "../", "");
 
-  if (!BACKEND_FASTIFY_PORT) {
-    throw Error("vite: BACKEND_FASTIFY_PORT must be defined");
-  }
+      const { BACKEND_FASTIFY_PORT } = env;
 
-  return {
-    preview: {
-      port: FRONTEND_UI_PORT ? +FRONTEND_UI_PORT : undefined,
-      strictPort: true,
-    },
-    server: {
-      port: FRONTEND_UI_PORT ? +FRONTEND_UI_PORT : undefined,
-      strictPort: true,
-      proxy: {
-        "/api": {
-          target: `http://localhost:${BACKEND_FASTIFY_PORT}`,
-          changeOrigin: true,
-          rewrite: (path) => path.replace(/^\/api/, ""),
+      if (!BACKEND_FASTIFY_PORT) {
+        throw Error("vite: BACKEND_FASTIFY_PORT must be defined");
+      }
+
+      return {
+        server: {
+          proxy: {
+            "/api": {
+              target: `http://localhost:${BACKEND_FASTIFY_PORT}`,
+              changeOrigin: true,
+              rewrite: (path) => path.replace(/^\/api/, ""),
+            },
+          },
         },
-      },
-    },
-  };
+      };
+
+    default:
+      throw Error(`Wrong vite command: ${command}`);
+  }
 });

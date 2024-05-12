@@ -13,4 +13,3 @@ RUN pnpm -F frontend deploy --prod /prod
 FROM nginx:1.26.0-alpine-slim
 COPY --from=build /prod/default.conf.template /etc/nginx/templates/default.conf.template
 COPY --from=build /prod/dist/ /var/www/html/
-RUN ls -al /var/www/html

@@ -4,14 +4,14 @@ import Matches from "db/matches";
 import { kill } from "utils/browser";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
 
-const { BACKEND_FASTIFY_PORT } = process.env;
+const { PORT } = process.env;
 
-if (!BACKEND_FASTIFY_PORT) {
-  throw Error("process.env.BACKEND_FASTIFY_PORT is not defined");
+if (!PORT) {
+  throw Error("process.env.PORT is not defined");
 }
 
 const FASTIFY_OPTIONS = {
-  port: +BACKEND_FASTIFY_PORT,
+  port: +PORT,
   host: "0.0.0.0",
 } as const;
 

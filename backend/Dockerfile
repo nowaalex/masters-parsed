@@ -15,5 +15,5 @@ RUN pnpm -F backend deploy --prod /prod
 FROM base as serve
 WORKDIR /src
 COPY --from=build /prod .
-EXPOSE ${BACKEND_FASTIFY_PORT}
+EXPOSE ${PORT}
 CMD pnpm serve

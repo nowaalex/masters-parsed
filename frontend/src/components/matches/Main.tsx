@@ -153,7 +153,7 @@ const Matches = () => {
           </button>
         </div>
       ) : matchesWithBonuses?.length ? (
-        <div className="grid p-4 gap-y-4 gap-x-6 grid-cols-[repeat(auto-fit,_minmax(330px,_1fr))] items-start">
+        <div className="grid p-4 gap-y-4 gap-x-6 grid-cols-[repeat(auto-fit,_minmax(340px,_1fr))] items-start">
           {matchesWithBonuses.map(([date, matchStruct]) => (
             <table key={date} className="table-fixed">
               <thead className="font-semibold">

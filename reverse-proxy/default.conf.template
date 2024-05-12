@@ -7,7 +7,7 @@ upstream fastify {
 }
 
 server {
-  listen ${REVERSE_PROXY_PORT};
+  listen ${PORT};
 
   location / {
     proxy_pass http://ui;
