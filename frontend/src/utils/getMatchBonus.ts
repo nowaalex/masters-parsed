@@ -1,5 +1,5 @@
-import type { Match } from "common-types";
-import type { Bonus } from "components/matches/BonusForm";
+import type { Match } from "common";
+import type { Bonus } from "types";
 
 /**
  * Match bonus is affected by:

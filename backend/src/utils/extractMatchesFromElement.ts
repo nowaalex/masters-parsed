@@ -1,4 +1,4 @@
-import type { Match, MatchesEntryBackend } from "common-types";
+import type { Match, MatchesEntryBackend } from "common";
 
 function extractMatchesFromElement(el: Element, playerName: string) {
   const matches: MatchesEntryBackend["data"] = [];

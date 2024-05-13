@@ -1,6 +1,10 @@
 import getPlayerMatches from "utils/getPlayerMatches";
 import Players from "db/players";
-import type { MatchesEntryBackend, MatchesEntryFrontend } from "common-types";
+import type {
+  Leagues,
+  MatchesEntryBackend,
+  MatchesEntryFrontend,
+} from "common";
 
 const REFETCH_INTERVAL = 1000 * 60 * 2;
 
@@ -55,7 +59,7 @@ class Matches {
     }
   }
 
-  get(name: string, league: string): MatchesEntryFrontend {
+  get(name: string, league: (typeof Leagues)[number]): MatchesEntryFrontend {
     const key = `${name}_${league}`;
     let entry = this.#map.get(key);
 

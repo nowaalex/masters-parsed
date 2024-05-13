@@ -2,11 +2,12 @@ import type { Page } from "puppeteer";
 import { getOptionValueByText } from "./dropdowns";
 import extractMatchesFromElement from "./extractMatchesFromElement";
 import { open, close } from "./page";
+import type { Leagues } from "common";
 
 async function getPlayerMatches(
   playerLink: string,
   playerName: string,
-  league: string
+  league: (typeof Leagues)[number]
 ) {
   let page: Page = null;
 

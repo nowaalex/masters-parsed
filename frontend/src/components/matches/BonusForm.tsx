@@ -1,14 +1,6 @@
 import { memo } from "react";
 import type { ComponentPropsWithoutRef } from "react";
-
-export interface Bonus {
-  /** bonus for each set won */
-  set: number;
-  /** bonus for first place */
-  first: number;
-  /** bonus for second place */
-  second: number;
-}
+import type { Bonus } from "types";
 
 const FIELDS = [
   ["set", "Set bonus"],

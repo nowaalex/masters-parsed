@@ -1,3 +1,12 @@
+export const Leagues = [
+  "Liga A",
+  "Liga B",
+  "Liga C",
+  "Liga kobiet A",
+  "Liga kobiet B",
+  "Superliga",
+] as const;
+
 export interface Match {
   time: string;
   rival: string;
@@ -9,7 +18,7 @@ export interface Match {
 
 interface MatchesEntryBase {
   name: string;
-  league: string;
+  league: (typeof Leagues)[number];
   timeStamp: number;
   data: [string, Match[]][];
   error: string;

@@ -3,6 +3,7 @@ import Players from "db/players";
 import Matches from "db/matches";
 import { kill } from "utils/browser";
 import type { JsonSchemaToTsProvider } from "@fastify/type-provider-json-schema-to-ts";
+import { Leagues } from "common";
 
 const { PORT } = process.env;
 
@@ -31,7 +32,7 @@ fastify.route({
       type: "object",
       properties: {
         name: { type: "string" },
-        league: { type: "string" },
+        league: { type: "string", enum: Leagues },
       },
       required: ["name", "league"],
     },

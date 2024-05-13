@@ -1,15 +1,7 @@
 import { type QueryFunction, useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { Form as InnerForm } from "react-router-dom";
-
-const Leagues = [
-  "Liga A",
-  "Liga B",
-  "Liga C",
-  "Liga kobiet A",
-  "Liga kobiet B",
-  "Superliga",
-] as const;
+import { Leagues } from "common";
 
 const queryFn: QueryFunction<string[], [string]> = () =>
   fetch("/api/players")

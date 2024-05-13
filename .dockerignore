@@ -1,6 +1,7 @@
 **/node_modules
 **/dist
+public
 .vscode
 .git
 .gitignore
-docker-compose.yml
+compose.yaml

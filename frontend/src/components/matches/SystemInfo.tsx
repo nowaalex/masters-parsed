@@ -1,5 +1,5 @@
 import { memo, useEffect, useReducer } from "react";
-import type { MatchesEntryFrontend } from "common-types";
+import type { MatchesEntryFrontend } from "common";
 
 interface Props
   extends Pick<MatchesEntryFrontend, "timeStamp" | "error" | "queueSize"> {

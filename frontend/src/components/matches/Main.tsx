@@ -1,10 +1,12 @@
-import { type QueryFunction, useQuery } from "@tanstack/react-query";
-import type { Match, MatchesEntryFrontend } from "common-types";
 import { Link, useSearchParams } from "react-router-dom";
-import { FormEvent, useEffect, useMemo, useReducer } from "react";
-import BonusForm, { type Bonus } from "./BonusForm";
-import getMatchBonus from "../../utils/getMatchBonus";
+import { type FormEvent, useEffect, useMemo, useReducer } from "react";
+import { type QueryFunction, useQuery } from "@tanstack/react-query";
+import { type MatchesEntryFrontend } from "common";
+import type { Bonus } from "types";
+import BonusForm from "./BonusForm";
 import SystemInfo from "./SystemInfo";
+import MatchTable from "./MatchTable";
+import getMatchesWithBonuses from "../../utils/getMatchesWithBonuses";
 
 const queryFn: QueryFunction<
   MatchesEntryFrontend,
@@ -20,39 +22,7 @@ const initialBonusValues = {
   second: 0,
 } as const satisfies Bonus;
 
-const getMatchRowColor = (m: Match) =>
-  m.forfeit
-    ? "bg-neutral-300"
-    : m.setsWon > m.setsLost
-    ? m.final
-      ? "bg-green-500"
-      : "bg-green-300"
-    : m.setsWon < m.setsLost
-    ? m.final
-      ? "bg-red-400"
-      : "bg-red-300"
-    : "";
-
-const getMatchesWithBonuses = (
-  matches: MatchesEntryFrontend["data"],
-  bonus: Bonus
-) =>
-  matches.map(([date, match]) => {
-    const matchWithBonuses = match.map((m) => ({
-      ...m,
-      bonus: getMatchBonus(m, bonus),
-    }));
-
-    return [
-      date,
-      {
-        match: matchWithBonuses,
-        bonus: matchWithBonuses.reduce((acc, m) => acc + m.bonus, 0),
-      },
-    ] as const;
-  });
-
-const reducer = (state: Bonus, e: FormEvent) => {
+const bonusValuesReducer = (state: Bonus, e: FormEvent) => {
   if (e.target instanceof HTMLInputElement) {
     const { name, value } = e.target;
     const numericValue = Number.parseInt(value, 10);
@@ -67,9 +37,12 @@ const reducer = (state: Bonus, e: FormEvent) => {
 };
 
 const Matches = () => {
-  const [searchParams] = useSearchParams();
+  const [bonus, setBonusValues] = useReducer(
+    bonusValuesReducer,
+    initialBonusValues
+  );
 
-  const [bonus, setBonusValues] = useReducer(reducer, initialBonusValues);
+  const [searchParams] = useSearchParams();
 
   const name = searchParams.get("name") || "";
   const league = searchParams.get("league") || "";
@@ -140,40 +113,12 @@ const Matches = () => {
       ) : matchesWithBonuses?.length ? (
         <div className="grid p-4 gap-y-4 gap-x-6 grid-cols-[repeat(auto-fit,_minmax(340px,_1fr))] items-start">
           {matchesWithBonuses.map(([date, matchStruct]) => (
-            <table key={date} className="table-fixed">
-              <thead className="font-semibold">
-                <tr>
-                  <td className="pl-1" colSpan={3}>
-                    {date}
-                  </td>
-                  <td className="text-right pr-1">{matchStruct.bonus}</td>
-                </tr>
-              </thead>
-              <tbody>
-                {matchStruct.match.map((m) => (
-                  <tr key={m.time} className={getMatchRowColor(m)}>
-                    <td className="w-[5ch] pl-1">{m.time}</td>
-                    <td className="px-2">
-                      <Link
-                        className="hover:underline"
-                        to={{
-                          search: new URLSearchParams({
-                            name: m.rival,
-                            league,
-                          }).toString(),
-                        }}
-                      >
-                        {m.rival}
-                      </Link>
-                    </td>
-                    <td className="w-[3ch]">
-                      {m.setsWon}:{m.setsLost}
-                    </td>
-                    <td className="w-[5ch] text-right pr-1">{m.bonus}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <MatchTable
+              key={date}
+              date={date}
+              league={league}
+              match={matchStruct}
+            />
           ))}
         </div>
       ) : (

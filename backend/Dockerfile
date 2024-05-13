@@ -9,7 +9,7 @@ FROM base as build
 WORKDIR /src
 COPY ../ ./
 RUN --mount=type=cache,id=pnpm,target=/pnpm/store pnpm install --frozen-lockfile
-RUN pnpm -F backend build
+RUN pnpm -F common -F backend build
 RUN pnpm -F backend deploy --prod /prod
 
 FROM base as serve
