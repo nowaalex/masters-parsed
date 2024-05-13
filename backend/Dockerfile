@@ -4,6 +4,7 @@ ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
 RUN apk add chromium
 ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD true
 
 FROM base as build
 WORKDIR /src
